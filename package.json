@@ -1,0 +1,48 @@
+{
+  "name": "enhanced-tube",
+  "productName": "EnhancedTube",
+  "version": "1.0.0",
+  "description": "YouTube Desktop Client with Enhanced Features.",
+  "keywords": [
+    "YouTube",
+    "YTDesktopClient"
+  ],
+  "homepage": "https://github.com/aspxcts777/EnhancedTube#readme",
+  "bugs": {
+    "url": "https://github.com/aspxcts777/EnhancedTube/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aspxcts777/EnhancedTube.git"
+  },
+  "license": "MIT",
+  "author": "Aspxcts777",
+  "type": "commonjs",
+  "main": "app.js",
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.4.0"
+  },
+  "dependencies": {
+    "custom-electron-titlebar": "^4.2.8"
+  },
+  "build": {
+    "appId": "com.aspxcts.enhancedtube",
+    "productName": "EnhancedTube",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "EnhancedTube"
+    }
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --accent: #ff0000; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100vh; text-align: center;
+            user-select: none;
+        }
+
+        .logo-container {
+            width: 105px; height: 80px;
+            background: var(--accent);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .logo-icon { width: 40px; height: 40px; fill: white; }
+
+        h1 {
+            font-size: 24px; margin: 0 0 10px 0;
+            background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(45deg, var(--text-color), var(--accent));
+        }
+
+        .version { font-size: 14px; opacity: 0.6; margin-bottom: 30px; font-family: monospace; }
+        .credits { font-size: 13px; opacity: 0.8; }
+        
+        a { color: var(--accent); text-decoration: none; font-weight: bold; cursor: pointer; }
+        a:hover { text-decoration: underline; }
+
+        .heart { color: #ff4d4d; display: inline-block; animation: beat 1s infinite alternate; }
+        @keyframes beat { to { transform: scale(1.2); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+
+    <h1>EnhancedTube</h1>
+    <div class="version">v1.0.0</div>
+
+    <div class="credits">
+        Created with <span class="heart">❤</span> by Aspxcts777<br>
+        <a id="githubLink">github.com/Aspxcts777</a>
+    </div>
+
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+        const root = document.documentElement;
+
+        try {
+            const cfg = ipcRenderer.sendSync('get-config');
+            if (cfg) {
+                if (cfg.text_color) root.style.setProperty('--accent', cfg.text_color);
+                
+                if (cfg.theme_mode === 'light') {
+                    root.style.setProperty('--bg-color', '#ffffff');
+                    root.style.setProperty('--text-color', '#000000');
+                }
+            }
+            
+            document.getElementById('githubLink').addEventListener('click', () => {
+                shell.openExternal('https://github.com/Aspxcts777');
+            });
+
+        } catch(e) {}
+    </script>
+</body>
+</html>

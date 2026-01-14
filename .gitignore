@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json 
+
+# Build Output 
+dist/
+release/
+build/
+
+# User Data & Config 
+user_data/
+config.json
+
+# Environment variables 
+.env
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDE Settings 
+.vscode/
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+electron-builder-debug.yml
+
+# Electron Builder files
+*/electron-builder/
