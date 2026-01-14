@@ -109,7 +109,7 @@ function createPopup(file, width, height, title) {
 // --- 6. MAIN APP LIFECYCLE ---
 app.whenReady().then(() => {
     
-    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    const userAgent = 'Chrome';
     mainWindow = new BrowserWindow({
         width: 1280, height: 720, title: "EnhancedTube",
         backgroundColor: cfg.oled ? '#000000' : '#0f0f0f',
