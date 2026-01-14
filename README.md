@@ -97,8 +97,9 @@ You can access the settings menus by **Right-Clicking** anywhere in the app or u
 
 ## 📄 License
 
-This project is licensed under the [MIT License]."# EnhancedTube" 
+This project is licensed under the [MIT License].
 
+EnhancedTube
 Modified MIT License
 
 Copyright (c) 2026 Aspxcts
