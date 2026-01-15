@@ -1,4 +1,3 @@
-const { setupTitlebar, attachTitlebarToWindow } = require("custom-electron-titlebar/main");
 const { app, BrowserWindow, Menu, ipcMain, shell, session, systemPreferences, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -11,7 +10,6 @@ const appID = 'com.aspxcts.enhancedtube';
 app.setAppUserModelId(appID);
 app.setName('EnhancedTube');
 let cfg = loadConfig();
-setupTitlebar();
 
 // FORCE THEME MODE AT STARTUP
 if (cfg.theme_mode === 'dark') nativeTheme.themeSource = 'dark';

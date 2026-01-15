@@ -144,14 +144,14 @@
     <script>
         const { ipcRenderer } = require('electron');
         const root = document.documentElement;
+        
+        // VARIABLE TO STORE SYSTEM COLOR
+        let lastSyncedColor = '#ff0000';
 
-        // UI Helpers
         function applyThemeColors(mode) {
             let isLight = false;
-            
             if (mode === 'light') isLight = true;
             else if (mode === 'system') {
-                // Detect System Theme via media query
                 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
                     isLight = true;
                 }
@@ -162,8 +162,6 @@
                 root.style.setProperty('--text-color', '#000000');
                 root.style.setProperty('--input-bg', '#f5f5f5');
                 root.style.setProperty('--border-color', '#ccc');
-                
-                // LOGIC: If we switched to a Light state, disable OLED
                 document.getElementById('oledCheck').checked = false;
             } else {
                 root.style.setProperty('--bg-color', '#000000');
@@ -174,6 +172,8 @@
         }
 
         function updateUI(color) {
+            // Safety: Ensure we have a valid hex, or fallback to Red
+            if (!color || color === 'undefined') color = '#ff0000';
             root.style.setProperty('--accent', color);
             document.getElementById('accentBtnLabel').innerText = `Accent Color: ${color}`;
         }
@@ -191,11 +191,9 @@
                     customOptions.forEach(o => o.classList.remove('selected'));
                     this.classList.add('selected');
                     const val = this.getAttribute('data-value');
-                    
-                    // Update UI
-                    updateDropdownUI(val);
+                    nativeSelect.value = val;
+                    customTrigger.textContent = this.textContent;
                     applyThemeColors(val); 
-                    
                     customWrapper.classList.remove('open');
                 });
             });
@@ -203,9 +201,7 @@
                 if (!customWrapper.contains(e.target)) customWrapper.classList.remove('open');
             });
         }
-
-        // Helper to update text/value of dropdown without triggering click events
-        function updateDropdownUI(val) {
+        function setDropdown(val) {
             nativeSelect.value = val;
             customOptions.forEach(opt => {
                 if(opt.getAttribute('data-value') === val) {
@@ -213,53 +209,72 @@
                     customTrigger.textContent = opt.textContent;
                 } else opt.classList.remove('selected');
             });
-        }
-
-        // Initial Set (used on load and by OLED toggle)
-        function setDropdown(val) {
-            updateDropdownUI(val);
             applyThemeColors(val);
         }
 
         async function handleSync() {
             const isSync = document.getElementById('syncCheck').checked;
             const container = document.getElementById('accentContainer');
+            
             if (isSync) {
                 container.style.opacity = '0.5';
                 container.style.pointerEvents = 'none';
-                let sys = await ipcRenderer.invoke('get-system-accent');
-                updateUI(sys);
+                
+                try {
+                    let sys = await ipcRenderer.invoke('get-system-accent');
+                    if (sys) {
+                        lastSyncedColor = sys; // Save it to variable
+                        updateUI(sys);
+                        document.getElementById('accentPicker').value = sys; // Keep picker sync
+                    }
+                } catch(e) { console.error("Sync Error", e); }
+
             } else {
                 container.style.opacity = '1';
                 container.style.pointerEvents = 'all';
-                updateUI(document.getElementById('accentPicker').value);
+                // No update here, we trust the logic that happened on "uncheck"
             }
         }
 
         try {
             setupDropdown();
             
-            // LOGIC: Enable OLED -> Force Dark Mode
+            // OLED Logic
             document.getElementById('oledCheck').addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    setDropdown('dark');
+                if (e.target.checked) setDropdown('dark');
+            });
+
+            // SYNC Logic: THE FIX
+            document.getElementById('syncCheck').addEventListener('change', (e) => {
+                // If UNCHECKING
+                if (!e.target.checked) {
+                    // Force picker to the last known system color BEFORE unlocking UI
+                    document.getElementById('accentPicker').value = lastSyncedColor;
+                    updateUI(lastSyncedColor);
                 }
+                handleSync();
             });
 
             const cfg = ipcRenderer.sendSync('get-config');
             if (cfg) {
                 let color = cfg.text_color || "#ff0000";
-                updateUI(color);
+                
+                // Initialize state
+                lastSyncedColor = color; 
                 document.getElementById('accentPicker').value = color;
                 
+                if (!cfg.sync_theme) updateUI(color);
+
                 document.getElementById('oledCheck').checked = cfg.oled || false;
                 document.getElementById('syncCheck').checked = cfg.sync_theme || false;
                 setDropdown(cfg.theme_mode || 'dark');
+                
                 if (cfg.sync_theme) handleSync();
             }
 
-            document.getElementById('syncCheck').addEventListener('change', handleSync);
-            document.getElementById('accentPicker').addEventListener('input', (e) => updateUI(e.target.value));
+            document.getElementById('accentPicker').addEventListener('input', (e) => {
+                updateUI(e.target.value);
+            });
 
             document.getElementById('saveBtn').addEventListener('click', () => {
                 ipcRenderer.send('save-appearance', {

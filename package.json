@@ -1,7 +1,7 @@
 {
   "name": "enhanced-tube",
   "productName": "EnhancedTube",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "YouTube Desktop Client with Enhanced Features.",
   "keywords": [
     "YouTube",
@@ -23,23 +23,38 @@
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0"
   },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "dist:all": "electron-builder -mwl"
+  },
   "build": {
     "appId": "com.aspxcts.enhancedtube",
     "productName": "EnhancedTube",
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns",
+      "category": "public.app-category.entertainment"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icon.png",
+      "category": "AudioVideo",
+      "maintainer": "Aspxcts777"
+    },
     "win": {
       "target": "nsis",
       "icon": "icon.ico"
-    }
-  },
-  "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder"
-  },
-  "nsis": {
+    },
+    "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "EnhancedTube"
     }
+  }
 }
