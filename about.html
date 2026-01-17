@@ -97,5 +97,30 @@
             shell.openExternal('https://github.com/aspxcts777/EnhancedTube');
         });
     </script>
+    <div id="mac-controls" style="display: none; text-align: center; margin-top: 20px;">
+    <button id="close-btn" style="
+        background: #333; 
+        color: white; 
+        border: 1px solid #555; 
+        padding: 8px 20px; 
+        border-radius: 5px; 
+        cursor: pointer;
+        font-family: sans-serif;">
+        Close
+    </button>
+</div>
+
+<script>
+    const { platform } = require('os');
+    const remote = require('electron').remote;
+    if (platform() === 'darwin') {
+        const container = document.getElementById('mac-controls');
+        const btn = document.getElementById('close-btn');
+        container.style.display = 'block';
+        btn.onclick = () => {
+            window.close();
+        };
+    }
+</script>
 </body>
 </html>
