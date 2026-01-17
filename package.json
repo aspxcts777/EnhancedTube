@@ -1,7 +1,7 @@
 {
   "name": "enhanced-tube",
   "productName": "EnhancedTube",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "YouTube Desktop Client with Enhanced Features.",
   "keywords": [
     "YouTube",
@@ -49,6 +49,12 @@
       "target": "nsis",
       "icon": "icon.ico"
     },
+    "protocols": [
+      {
+        "name": "EnhancedTube URL",
+        "schemes": ["enhancedtube"]
+      }
+    ],
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
