@@ -111,7 +111,12 @@ if (!gotTheLock) {
 
     function loadDeepLink(deepLink) {
         let targetUrl = deepLink.replace('enhancedtube://', 'https://');
+        targetUrl = targetUrl.replace(/([^:]\/)\/+/g, "$1");
+        if (targetUrl === 'https://www.youtube.com' || targetUrl === 'https://www.youtube.com/') {
+            targetUrl = 'https://www.youtube.com';
+        }
         if (targetUrl.includes('youtube.com') || targetUrl.includes('youtu.be')) {
+            console.log("Navigating to:", targetUrl); // Debug log
             mainWindow.loadURL(targetUrl);
         }
     }
@@ -231,7 +236,14 @@ if (!gotTheLock) {
         mainWindow.webContents.on('will-navigate', handleUrlChange);
         mainWindow.webContents.on('did-navigate-in-page', handleUrlChange);
         mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-            if (!url.includes('youtube.com')) { shell.openExternal(url); return { action: 'deny' }; }
+            if (url.includes('youtube.com/redirect')) {
+                shell.openExternal(url); 
+                return { action: 'deny' };
+            }
+            if (!url.includes('youtube.com') && !url.includes('youtu.be')) { 
+                shell.openExternal(url); 
+                return { action: 'deny' }; 
+            }
             return { action: 'allow' };
         });
 
