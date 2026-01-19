@@ -78,8 +78,43 @@ if (!gotTheLock) {
 
     function updateThumbar() {
         if (!mainWindow) return;
-        // ... (Keep existing Thumbar logic) ...
-        // [Simplified for brevity - your previous code here works fine]
+        if (process.platform !== 'win32') return;
+
+        const buttons = [
+            {
+                tooltip: 'Previous',
+                icon: getIcon('previous'),
+                click: () => {
+                    mainWindow.webContents.executeJavaScript(`
+                        (function(){
+                            var btn = document.querySelector('.ytp-prev-button');
+                            if (btn && btn.style.display !== 'none' && !btn.getAttribute('aria-disabled')) {
+                                btn.click();
+                            } else {
+                                var v = document.querySelector('video');
+                                if (v) v.currentTime = 0;
+                            }
+                        })()
+                    `);
+                },
+                flags: ['dismissonclick']
+            },
+            {
+                tooltip: isPlaying ? 'Pause' : 'Play',
+                icon: isPlaying ? getIcon('pause') : getIcon('play'),
+                click: () => {
+                    mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-play-button').click()");
+                },
+                flags: ['dismissonclick']
+            },
+            {
+                tooltip: 'Next',
+                icon: getIcon('next'),
+                click: () => mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-next-button').click()"),
+                flags: ['dismissonclick']
+            }
+        ];
+        try { mainWindow.setThumbarButtons(buttons); } catch(e) {}
     }
 
     function loadDeepLink(deepLink) {
@@ -275,6 +310,21 @@ if (!gotTheLock) {
             else { aboutWindow = createPopup('about.html', 400, 400, 'About'); aboutWindow.on('closed', () => aboutWindow = null); }
         });
         mainWindow.on('closed', () => { appearanceWindow = null; optionsWindow = null; aboutWindow = null; });
+        setInterval(async () => {
+            if (!mainWindow || mainWindow.isDestroyed()) return;
+            try {
+                // Returns true ONLY if a video exists AND is playing
+                const playing = await mainWindow.webContents.executeJavaScript(
+                    `!!(document.querySelector('video') && !document.querySelector('video').paused && !document.querySelector('video').ended)`
+                );
+                
+                // Only update the buttons if the state has changed
+                if (playing !== isPlaying) {
+                    isPlaying = playing;
+                    updateThumbar();
+                }
+            } catch (e) {}
+        }, 500);
     });
 
     ipcMain.handle('get-system-accent', () => {
