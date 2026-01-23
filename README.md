@@ -5,6 +5,7 @@
 ## 📥 Download
 
 Get the latest installer for Windows, Linux and MacOS:
+
 **[Download Latest Release](https://github.com/Aspxcts777/EnhancedTube/releases)**
 
 ---
