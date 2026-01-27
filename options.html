@@ -77,6 +77,7 @@
         <label class="checkbox-wrapper"><input type="checkbox" id="alwaysOnTop"><span class="checkmark"></span><span class="label-text">Keep window always on top</span></label>
         <label class="checkbox-wrapper"><input type="checkbox" id="startOnBoot"><span class="checkmark"></span><span class="label-text">Start YouTube on system boot</span></label>
         <label class="checkbox-wrapper"><input type="checkbox" id="enableAdBlock"><span class="checkmark"></span><span class="label-text">Enable AdBlocker</span></label>
+        <label class="checkbox-wrapper"><input type="checkbox" id="show_splash"><span class="checkmark"></span><span class="label-text">Enable Splash on Startup</span></label>
 
         <div class="section-title">Advanced Rendering <span class="restart-hint">(Restart Required)</span></div>
         <label class="checkbox-wrapper"><input type="checkbox" id="av1"><span class="checkmark"></span><span class="label-text">Enable AV1 Codec</span></label>
@@ -131,6 +132,7 @@
                     document.getElementById('alwaysOnTop').checked = cfg.always_on_top || false;
                     document.getElementById('startOnBoot').checked = cfg.start_on_boot || false;
                     document.getElementById('enableAdBlock').checked = cfg.enable_adblock !== false;
+                    document.getElementById('show_splash').checked = cfg.show_splash !== false;
 
                     document.getElementById('av1').checked = cfg.use_av1 || false;
                     document.getElementById('skia').checked = cfg.UseSkiaRenderer || false;
@@ -152,6 +154,7 @@
                 always_on_top: document.getElementById('alwaysOnTop').checked,
                 start_on_boot: document.getElementById('startOnBoot').checked,
                 enable_adblock: document.getElementById('enableAdBlock').checked,
+                show_splash: document.getElementById('show_splash').checked,
                 use_av1: document.getElementById('av1').checked,
                 UseSkiaRenderer: document.getElementById('skia').checked,
                 use_vaapi: document.getElementById('vaapi').checked,
