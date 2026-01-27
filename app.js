@@ -12,6 +12,12 @@ const GITHUB_REPO = 'aspxcts777/EnhancedTube';
 app.setAppUserModelId(appId);
 app.setName('EnhancedTube');
 
+if (process.platform === 'linux') { 
+    app.commandLine.appendSwitch('no-sandbox');
+    app.commandLine.appendSwitch('disable-gpu'); // Prevents white/black screen glitches
+    app.commandLine.appendSwitch('enable-transparent-visuals');
+}
+
 // --- 1. IDENTITIES ---
 const USER_AGENT_DESKTOP = process.platform === 'darwin' 
     ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
