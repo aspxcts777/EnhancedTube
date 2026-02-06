@@ -5,20 +5,14 @@ const { mainMenu } = require('./contextmenu');
 const { loadConfig, saveConfig } = require('./config'); 
 const { getThemeCss, getThemeJs } = require('./theme'); 
 
-// --- CONFIGURATION ---
+//CONFIGURATION
 const appId = 'com.aspxcts.enhancedtube';
 const GITHUB_REPO = 'aspxcts777/EnhancedTube'; 
 
 app.setAppUserModelId(appId);
 app.setName('EnhancedTube');
 
-if (process.platform === 'linux') { 
-    app.commandLine.appendSwitch('no-sandbox');
-    app.commandLine.appendSwitch('disable-gpu'); // Prevents white/black screen glitches
-    app.commandLine.appendSwitch('enable-transparent-visuals');
-}
-
-// --- 1. IDENTITIES ---
+//IDENTITIES
 const USER_AGENT_DESKTOP = process.platform === 'darwin' 
     ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
@@ -27,7 +21,7 @@ const USER_AGENT_MOBILE = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36
 
 app.userAgentFallback = USER_AGENT_DESKTOP;
 
-// --- 2. FLAGS ---
+//FLAGS
 app.commandLine.appendSwitch('disable-blink-features', 'AutomationControlled');
 app.commandLine.appendSwitch('disable-site-isolation-trials');
 if (process.platform === 'linux') { 
@@ -36,7 +30,7 @@ if (process.platform === 'linux') {
     app.commandLine.appendSwitch('disable-gpu');
 }
 
-// --- 3. PROTOCOL ---
+//PROTOCOL
 if (process.defaultApp) {
     if (process.argv.length >= 2) {
         app.setAsDefaultProtocolClient('enhancedtube', process.execPath, [path.resolve(process.argv[1])]);
@@ -71,11 +65,17 @@ if (!gotTheLock) {
     else if (cfg.theme_mode === 'light') nativeTheme.themeSource = 'light';
     else nativeTheme.themeSource = 'system';
 
-    // --- HELPER FUNCTIONS ---
+    //HELPER FUNCTIONS
     function getIcon(name) {
-        const iconPath = path.join(__dirname, 'assets', `${name}.png`);
-        try { return nativeImage.createFromPath(iconPath).resize({ width: 32, height: 32 }); } catch (e) { return null; }
+    const iconPath = path.join(__dirname, 'assets', `${name}.png`);
+
+    if (!fs.existsSync(iconPath)) {
+        console.warn('Missing icon:', iconPath);
+        return nativeImage.createEmpty(); 
     }
+
+    return nativeImage.createFromPath(iconPath).resize({ width: 32, height: 32 });
+}
 
     function loadDeepLink(deepLink) {
         let targetUrl = deepLink.replace('enhancedtube://', 'https://');
@@ -83,11 +83,11 @@ if (!gotTheLock) {
         if (targetUrl.includes('youtube.com') || targetUrl.includes('youtu.be')) mainWindow.loadURL(targetUrl);
     }
 
-    // --- UPDATE CHECKER ---
+    //UPDATE CHECKER
     async function checkForUpdates() {
         try {
             const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
-            if (!response.ok) return; // Silent fail if offline or rate limited
+            if (!response.ok) return;
             const data = await response.json();
             const latestVersion = data.tag_name.replace('v', '');
             const currentVersion = app.getVersion();
@@ -104,7 +104,7 @@ if (!gotTheLock) {
                 });
 
                 if (response === 0) {
-                    shell.openExternal(data.html_url); // Open GitHub Release page
+                    shell.openExternal(data.html_url); 
                 }
             }
         } catch (e) {
@@ -160,6 +160,47 @@ if (!gotTheLock) {
         });
         splashWindow.loadFile('splash.html');
         splashWindow.center();
+    }
+
+    function updateThumbar() {
+        if (!mainWindow) return;
+        if (process.platform !== 'win32') return;
+
+        const buttons = [
+            {
+                tooltip: 'Previous',
+                icon: getIcon('previous'),
+                click: () => {
+                    mainWindow.webContents.executeJavaScript(`
+                        (function(){
+                            var btn = document.querySelector('.ytp-prev-button');
+                            if (btn && btn.style.display !== 'none' && !btn.getAttribute('aria-disabled')) {
+                                btn.click();
+                            } else {
+                                var v = document.querySelector('video');
+                                if (v) v.currentTime = 0;
+                            }
+                        })()
+                    `);
+                },
+                flags: ['dismissonclick']
+            },
+            {
+                tooltip: isPlaying ? 'Pause' : 'Play',
+                icon: isPlaying ? getIcon('pause') : getIcon('play'),
+                click: () => {
+                    mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-play-button').click()");
+                },
+                flags: ['dismissonclick']
+            },
+            {
+                tooltip: 'Next',
+                icon: getIcon('next'),
+                click: () => mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-next-button').click()"),
+                flags: ['dismissonclick']
+            }
+        ];
+        try { mainWindow.setThumbarButtons(buttons); } catch(e) {}
     }
 
     function showMenu() {
@@ -238,21 +279,16 @@ if (!gotTheLock) {
         setInterval(async () => {
             if (!mainWindow || mainWindow.isDestroyed()) return;
             try {
-                const playing = await mainWindow.webContents.executeJavaScript(`!!(document.querySelector('video') && !document.querySelector('video').paused && !document.querySelector('video').ended)`);
-                if (playing !== isPlaying) { isPlaying = playing; updateThumbar(); }
+                const playing = await mainWindow.webContents.executeJavaScript(
+                    `!!(document.querySelector('video') && !document.querySelector('video').paused && !document.querySelector('video').ended)`
+                );
+                
+                if (playing !== isPlaying) {
+                    isPlaying = playing;
+                    updateThumbar();
+                }
             } catch (e) {}
-        }, 500); 
-
-        function updateThumbar() {
-            if (!mainWindow || process.platform !== 'win32') return;
-            const buttons = [
-                { tooltip: 'Previous', icon: getIcon('previous'), click: () => { mainWindow.webContents.executeJavaScript(`(function(){ var btn = document.querySelector('.ytp-prev-button'); if (btn && btn.style.display !== 'none' && !btn.getAttribute('aria-disabled')) { btn.click(); } else { var v = document.querySelector('video'); if (v) v.currentTime = 0; } })()`); }, flags: ['dismissonclick'] },
-                { tooltip: isPlaying ? 'Pause' : 'Play', icon: isPlaying ? getIcon('pause') : getIcon('play'), click: () => { mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-play-button').click()"); }, flags: ['dismissonclick'] },
-                { tooltip: 'Next', icon: getIcon('next'), click: () => mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-next-button').click()"), flags: ['dismissonclick'] }
-            ];
-            try { mainWindow.setThumbarButtons(buttons); } catch(e) {}
-        }
-        updateThumbar();
+        }, 500);
 
         nativeTheme.on('updated', () => { if (cfg.theme_mode === 'system') injectTheme(); });
         mainWindow.on('open-appearance', () => { 
