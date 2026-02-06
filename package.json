@@ -28,6 +28,8 @@
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac",
+    "dist:mac-intel": "electron-builder --mac --x64",
+    "dist:mac-universal": "electron-builder --mac --universal",
     "dist:linux": "electron-builder --linux",
     "dist:all": "electron-builder -mwl",
     "generate-notes": "node scripts/generate-notes.js"
@@ -53,7 +55,9 @@
     "protocols": [
       {
         "name": "EnhancedTube URL",
-        "schemes": ["enhancedtube"]
+        "schemes": [
+          "enhancedtube"
+        ]
       }
     ],
     "nsis": {
@@ -64,11 +68,11 @@
       "shortcutName": "EnhancedTube"
     },
     "publish": {
-    "provider": "github",
-    "releaseType": "release" 
-  },
+      "provider": "github",
+      "releaseType": "release"
+    },
     "releaseInfo": {
-    "releaseNotesFile": "release-notes.md"
-  }
+      "releaseNotesFile": "release-notes.md"
+    }
   }
 }
