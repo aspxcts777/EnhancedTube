@@ -5,14 +5,12 @@ const { mainMenu } = require('./contextmenu');
 const { loadConfig, saveConfig } = require('./config'); 
 const { getThemeCss, getThemeJs } = require('./theme'); 
 
-//CONFIGURATION
 const appId = 'com.aspxcts.enhancedtube';
 const GITHUB_REPO = 'aspxcts777/EnhancedTube'; 
 
 app.setAppUserModelId(appId);
 app.setName('EnhancedTube');
 
-//IDENTITIES
 const USER_AGENT_DESKTOP = process.platform === 'darwin' 
     ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
@@ -21,7 +19,6 @@ const USER_AGENT_MOBILE = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36
 
 app.userAgentFallback = USER_AGENT_DESKTOP;
 
-//FLAGS
 app.commandLine.appendSwitch('disable-blink-features', 'AutomationControlled');
 app.commandLine.appendSwitch('disable-site-isolation-trials');
 if (process.platform === 'linux') { 
@@ -30,7 +27,6 @@ if (process.platform === 'linux') {
     app.commandLine.appendSwitch('disable-gpu');
 }
 
-//PROTOCOL
 if (process.defaultApp) {
     if (process.argv.length >= 2) {
         app.setAsDefaultProtocolClient('enhancedtube', process.execPath, [path.resolve(process.argv[1])]);
