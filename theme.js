@@ -1,4 +1,4 @@
-// theme.js - v1.5 - Universal Red Override
+// 1.2.1
 module.exports.getThemeCss = (cfg, accent, isDark) => {
     
     // 1. DEFINE COLORS

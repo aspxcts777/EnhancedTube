@@ -1,3 +1,4 @@
+//1.2.1
 const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
