@@ -61,6 +61,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "EnhancedTube"
-    }
+    },
+    "publish": {
+    "provider": "github",
+    "releaseType": "release" 
+  }
   }
 }
