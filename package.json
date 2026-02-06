@@ -29,7 +29,8 @@
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac",
     "dist:linux": "electron-builder --linux",
-    "dist:all": "electron-builder -mwl"
+    "dist:all": "electron-builder -mwl",
+    "generate-notes": "node scripts/generate-notes.js"
   },
   "build": {
     "appId": "com.aspxcts.enhancedtube",
@@ -65,6 +66,9 @@
     "publish": {
     "provider": "github",
     "releaseType": "release" 
+  },
+    "releaseInfo": {
+    "releaseNotesFile": "release-notes.md"
   }
   }
 }
