@@ -122,6 +122,13 @@ if (!gotTheLock) {
         mainWindow.webContents.executeJavaScript(getThemeJs(accent)).catch(e => {});
     }
 
+    function handleUrlChange(event, url) {
+    if (cfg.replace_shorts && url.includes('/shorts/')) {
+        const videoId = url.split('/shorts/')[1].split('?')[0];
+        mainWindow.loadURL(`https://www.youtube.com/watch?v=${videoId}`);
+    }
+}
+
     function openLoginWindow(targetUrl) {
         if (loginWindow) { loginWindow.focus(); return; }
         loginWindow = new BrowserWindow({
@@ -186,7 +193,28 @@ if (!gotTheLock) {
                 tooltip: isPlaying ? 'Pause' : 'Play',
                 icon: isPlaying ? getIcon('pause') : getIcon('play'),
                 click: () => {
-                    mainWindow.webContents.executeJavaScript("document.querySelector('.ytp-play-button').click()");
+                    mainWindow.webContents.executeJavaScript(`
+                (function () {
+                    const video = document.querySelector('video');
+
+                    // No video or video element is detached → do NOTHING
+                    if (!video || !document.body.contains(video)) return;
+
+                    // If video ended, restart cleanly
+                    if (video.ended) {
+                        video.currentTime = 0;
+                        video.play();
+                        return;
+                    }
+
+                    // Toggle play/pause safely
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                })();
+                `);
                 },
                 flags: ['dismissonclick']
             },
@@ -229,8 +257,15 @@ if (!gotTheLock) {
             width: 1280, height: 720, title: "EnhancedTube", show: false,
             backgroundColor: cfg.oled ? '#000000' : '#0f0f0f',
             frame: true,
+            titleBarStyle: 'hidden',
+            titleBarOverlay: {
+            color: '#000000',      
+            symbolColor: '#ffffff', 
+            height: 20,
+            sandbox: false              
+            },
             icon: path.join(__dirname, 'icon.ico'),
-            webPreferences: { nodeIntegration: false, contextIsolation: true },
+            webPreferences: { nodeIntegration: false, contextIsolation: true, preload: path.join(__dirname, 'preload.js') },
             alwaysOnTop: cfg.always_on_top || false
         });
 
@@ -244,16 +279,32 @@ if (!gotTheLock) {
             if (deepLink) startUrl = deepLink.replace('enhancedtube://', 'https://');
         }
         mainWindow.loadURL(startUrl);
+        mainWindow.webContents.on('will-navigate', handleUrlChange);
+        mainWindow.webContents.on('did-navigate-in-page', handleUrlChange);
 
-        mainWindow.once('ready-to-show', () => {
-            if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close();
-            mainWindow.show();
-        });
+        if (mainWindow && mainWindow.webContents) {
+            mainWindow.webContents.removeAllListeners('did-stop-loading'); 
+            mainWindow.webContents.removeAllListeners('did-finish-load');
+        }
 
-        mainWindow.webContents.once('did-finish-load', () => {
-           if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close();
-           if (!mainWindow.isVisible()) mainWindow.show();
-           injectTheme(); updateThumbar();
+
+        mainWindow.webContents.on('did-stop-loading', () => {
+            try {
+                console.log("Page Loaded - Injecting Theme & UI...");
+            
+                injectTheme();
+                updateThumbar();
+            
+                if (splashWindow && !splashWindow.isDestroyed()) {
+                    splashWindow.close();
+                }
+                if (!mainWindow.isVisible()) {
+                    mainWindow.show();
+                }
+            
+            } catch (e) { 
+                console.log("Error during page load tasks:", e); 
+            }
         });
 
         mainWindow.webContents.on('will-navigate', (event, url) => {
@@ -270,8 +321,6 @@ if (!gotTheLock) {
             if (url.includes('youtube.com/redirect') || (!url.includes('youtube.com') && !url.includes('youtu.be'))) { shell.openExternal(url); return { action: 'deny' }; }
             return { action: 'allow' };
         });
-
-        mainWindow.webContents.on('did-finish-load', () => { injectTheme(); updateThumbar(); });
 
         setInterval(async () => {
             if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -309,6 +358,10 @@ if (!gotTheLock) {
             if (color && color.substring(0, 6) !== "000000") return '#' + color.substring(0, 6);
         }
         return '#ff0000'; 
+    });
+    ipcMain.on('show-context-menu', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    mainMenu.popup({ window: win });
     });
 
     ipcMain.on('save-appearance', (event, newCfg) => {

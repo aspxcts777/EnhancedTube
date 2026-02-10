@@ -97,6 +97,51 @@ module.exports.getThemeCss = (cfg, accent, isDark) => {
             .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment {
             	background: ${accent} !important;
             }
+
+/* ====================================================
+   YOUTUBE MAIN (Standard) - PUSH DOWN LOGIC
+   ==================================================== */
+#masthead-container,
+ytd-masthead {
+    top: 16px !important;
+    position: fixed !important;
+    width: 100% !important;
+    z-index: 2020 !important;
+}
+
+/* 2. PAGE MANAGER (Main Content)
+   Math: 32px (Custom Bar) + 56px (Header) = 88px.
+   The content must start at 88px to be visible below the header. */
+ytd-page-manager#page-manager {
+    margin-top: 88px !important;
+}
+
+/* 3. FILTER CHIPS (The "Selector" Bar) 
+   Sticks exactly below the header (at 88px). */
+ytd-feed-filter-chip-bar-renderer {
+    top: 88px !important;
+    position: sticky !important;
+    z-index: 2000 !important;
+    background-color: var(--yt-spec-base-background) !important;
+}
+
+tp-yt-app-drawer {
+    margin-top: 32px !important;
+}
+
+/* 5. MINI GUIDE (The thin icon strip on the left) 
+   This is separate from the drawer. It needs to start below the header. */
+ytd-mini-guide-renderer {
+    top: 88px !important;
+    position: fixed !important;
+    z-index: 2001 !important;
+    height: calc(100vh - 88px) !important;
+}
+
+/* 6. SEARCH SUGGESTIONS */
+.sbdd_a {
+    top: 88px !important;
+}
         `;
     }
 
@@ -182,6 +227,18 @@ module.exports.getThemeCss = (cfg, accent, isDark) => {
             .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment {
             	background: ${accent} !important;
             }
+
+
+ytd-app,
+ytmusic-app {
+    transform: translateY(32px);
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
     `;
 };
 

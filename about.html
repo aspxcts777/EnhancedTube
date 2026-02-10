@@ -1,4 +1,4 @@
-<!-- 1.2.1 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
-            --accent: #ff0000; 
+            --accent: #6200ff; 
             /* Added these variables to match Options tab style */
             --input-height: 40px;
             --border-radius: 8px;
@@ -24,21 +24,11 @@
             overflow: hidden; /* Prevents scrollbars */
         }
 
-        .logo-container {
-            width: 105px; height: 80px;
-            background: var(--accent);
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
-        .logo-icon { width: 40px; height: 40px; fill: white; }
-
         h1 {
             font-size: 24px; margin: 0 0 10px 0;
             background-clip: text; -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-image: linear-gradient(135deg, var(--text-color) 30%, var(--accent) 100%);
+            background-image: linear-gradient(135deg, #ea00ff, #6200ff);
         }
 
         .version { font-size: 14px; opacity: 0.8; margin-bottom: 30px; font-family: monospace; }
@@ -74,7 +64,7 @@
         }
 
         .action-btn:hover {
-            background: var(--accent);
+            background: #6200ff;
             color: #000000; 
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -86,12 +76,12 @@
     </style>
 </head>
 <body>
-    <div class="logo-container">
-        <svg class="logo-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <div class="logo">
+        <img src="icon.png" alt="EnhancedTube Logo" style="width: 100px; height: 100px">
     </div>
 
     <h1>EnhancedTube</h1>
-    <div class="version">v1.2.0</div>
+    <div class="version">1.3.0</div>
 
     <div class="credits">
         Created with <span class="heart">❤</span> by Aspxcts777<br>
@@ -103,7 +93,7 @@
     </div>
 
     <div id="mac-controls" style="display: none; width: 100%; padding: 0 50px; box-sizing: border-box; margin-top: 10px;">
-        <button class="action-btn" id="close-btn">Close (Mac)</button>
+        <button class="action-btn" id="close-btn">Close</button>
     </div>
 
     <script>
@@ -126,7 +116,6 @@
                             if (sysColor) color = sysColor;
                         } catch (e) { console.log("Sync error", e); }
                     }
-                    root.style.setProperty('--accent', color);
 
                     if (cfg.theme_mode === 'light') {
                         root.style.setProperty('--bg-color', '#ffffff');
