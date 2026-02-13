@@ -1,6 +1,31 @@
-// 1.2.1
+// 1.3.1
 module.exports.getThemeCss = (cfg, accent, isDark) => {
     
+    const fullscreenFixCss = `
+    body.fullscreen-mode #title-bar, 
+    body.fullscreen-mode .custom-titlebar, 
+    body.fullscreen-mode #titlebar { 
+        display: none !important; 
+        height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* 2. Collapse the 20px Gap at the top */
+    body.fullscreen-mode #masthead-container,
+    body.fullscreen-mode ytd-masthead,
+    body.fullscreen-mode tp-yt-app-drawer, 
+    body.fullscreen-mode ytd-mini-guide-renderer,
+    body.fullscreen-mode ytd-guide-renderer #header {
+        top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* 3. Reset Page Content */
+    body.fullscreen-mode ytd-page-manager#page-manager {
+        margin-top: 0 !important;
+    }`
+
     // 1. DEFINE COLORS
     const bgMain = isDark ? "#0f0f0f" : "#ffffff";
     const bgSecond = isDark ? "#0f0f0f" : "#ffffff"; 
@@ -142,6 +167,7 @@ ytd-mini-guide-renderer {
 .sbdd_a {
     top: 88px !important;
 }
+    ${fullscreenFixCss}
         `;
     }
 
@@ -173,16 +199,26 @@ ytd-mini-guide-renderer {
     ::-webkit-scrollbar-thumb { background: #1a1a1a !important; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: ${accent} !important; }
 
-    ytd-masthead, #yt-masthead-container {
+    ytd-masthead, 
+    #masthead-container,
+    ytd-masthead #container, 
+    ytd-masthead #background {
+        background: #000000 !important;
         background-color: #000000 !important;
+        margin-top: -3px !important;
+        --yt-spec-base-background: #000000 !important;
+        --yt-spec-raised-background: #000000 !important;
+        --yt-spec-menu-background: #000000 !important;
+        
         border-bottom: 1px solid #1a1a1a !important;
     }
     
+    /* Search Bar Input Box (Ensure it stays black too) */
     ytd-searchbox[mode], #container.ytd-searchbox {
         background-color: #000000 !important;
         border: 1px solid #1a1a1a !important;
+        box-shadow: none !important;
     }
-    ytd-searchbox[has-focus] #container.ytd-searchbox { border-color: ${accent} !important; }
 
     /* Fix Live Badges for OLED */
     ytd-thumbnail-overlay-time-status-renderer[overlay-style="LIVE"],
@@ -211,34 +247,60 @@ ytd-mini-guide-renderer {
     ytd-topbar-logo-renderer #logo-icon svg path { fill: #ffffff !important; }
     ytd-topbar-logo-renderer #logo-icon svg > g:first-of-type > path:first-of-type { fill: ${accent} !important; }
     
-    ytd-rich-item-renderer:has(> .ytd-ad-slot-renderer), #masthead-ad { display: none !important; }
     ytd-rich-item-renderer:has(> .ytd-ad-slot-renderer), #masthead-ad, ytd-ad-slot-renderer { display: none !important; }
-            .YtProgressBarLineProgressBarPlayed,
-            .ytProgressBarLineProgressBarPlayed,
-            .YtProgressBarPlayheadProgressBarPlayheadDot,
-            .ytProgressBarPlayheadProgressBarPlayheadDot,
-            /*2024-10-23 video progress*/
-            ytd-thumbnail-overlay-resume-playback-renderer[enable-refresh-signature-moments-web] #progress.ytd-thumbnail-overlay-resume-playback-renderer,
-            /*2024-10-27*/
-            /*on home page hover & shorts*/
-            .YtProgressBarLineProgressBarPlayedRefresh,
-            .ytProgressBarLineProgressBarPlayedRefresh,
-            .YtThumbnailOverlayProgressBarHostWatchedProgressBarSegmentModern,
-            .ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment {
-            	background: ${accent} !important;
-            }
 
+    /* ====================================================
+       YOUTUBE OLED - PUSH DOWN LOGIC
+       ==================================================== */
 
-ytd-app,
-ytmusic-app {
-    transform: translateY(32px);
-}
+    /* 1. Header Placement */
+    #masthead-container,
+    ytd-masthead {
+        top: 20px !important; 
+        position: fixed !important;
+        width: 100% !important;
+        z-index: 2020 !important;
+    }
 
-body {
-    margin: 0 !important;
-    padding: 0 !important;
-}
+    /* 2. Content Placement */
+    ytd-page-manager#page-manager {
+        margin-top: 100px !important; 
+    }
 
+    /* 3. Filter Bar */
+    ytd-feed-filter-chip-bar-renderer {
+        top: 76px !important;
+        position: sticky !important;
+        z-index: 2000 !important;
+        background-color: #000000 !important; /* Force Black for OLED */
+    }
+
+    /* 4. Sidebar */
+    tp-yt-app-drawer { 
+    margin-top: 32px !important; 
+    }
+
+    /* 5. Guide */
+    ytd-guide-renderer #header {
+        margin-top: 30px !important; 
+        background-color: transparent !important; 
+    }
+    ytd-mini-guide-renderer {
+        top: 76px !important;
+        position: fixed !important;
+        z-index: 2001 !important;
+        height: calc(100vh - 76px) !important;
+        background-color: #000000 !important; /* Force Black */
+    }
+
+    /* 6. Search Suggestions */
+    .sbdd_a { top: 76px !important; }
+
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    ${fullscreenFixCss}
     `;
 };
 
@@ -303,5 +365,6 @@ module.exports.getThemeJs = (accent) => {
             }, 50); // Checks 20 times per second
 
         })();
+
     `;
 };

@@ -109,15 +109,60 @@ if (!gotTheLock) {
         }
     }
 
-    function injectTheme() {
+function injectTheme() {
         if (!mainWindow) return;
+
+        // --- FIX: DEFINE VARIABLES FIRST ---
+        // 1. Determine Dark/Light Mode
+        let isDark = true;
+        if (cfg.theme_mode === 'light') {
+            isDark = false;
+        } else if (cfg.theme_mode === 'system') {
+            isDark = nativeTheme.shouldUseDarkColors;
+        }
+
+        // 2. Determine Accent Color
         let accent = cfg.text_color || "#ff0000";
         if (cfg.sync_theme && process.platform === 'win32') {
             let sysColor = systemPreferences.getAccentColor(); 
-            if (sysColor && sysColor.substring(0, 6) !== "000000") accent = '#' + sysColor.substring(0, 6);
+            if (sysColor && sysColor.substring(0, 6) !== "000000") {
+                accent = '#' + sysColor.substring(0, 6);
+            }
         }
-        let isDark = (cfg.theme_mode === 'light') ? false : true;
-        
+
+        // --- NOW START THE LOGIC ---
+        if (!isDark) {
+            // ===============================================
+            // LIGHT MODE LOGIC
+            // ===============================================
+            try {
+                mainWindow.setTitleBarOverlay({
+                    color: '#ffffff',
+                    symbolColor: '#000000'
+                });
+                mainWindow.setBackgroundColor('#ffffff');
+            } catch(e) {}
+
+            const lightCssPath = path.join(__dirname, 'light-mode.css');
+            fs.readFile(lightCssPath, 'utf8', (err, data) => {
+                if (!err) mainWindow.webContents.insertCSS(data).catch(e => {});
+            });
+
+        } else {
+            // ===============================================
+            // DARK / OLED MODE LOGIC
+            // ===============================================
+            try {
+                mainWindow.setTitleBarOverlay({
+                    color: '#000000',
+                    symbolColor: '#ffffff'
+                });
+                mainWindow.setBackgroundColor('#000000');
+            } catch(e) {}
+        }
+
+        // --- APPLY MAIN THEME CSS ---
+        // Now passing the correctly defined variables
         mainWindow.webContents.insertCSS(getThemeCss(cfg, accent, isDark)).catch(e => {});
         mainWindow.webContents.executeJavaScript(getThemeJs(accent)).catch(e => {});
     }
@@ -256,7 +301,7 @@ if (!gotTheLock) {
         mainWindow = new BrowserWindow({
             width: 1280, height: 720, title: "EnhancedTube", show: false,
             backgroundColor: cfg.oled ? '#000000' : '#0f0f0f',
-            frame: true,
+            frame: false,
             titleBarStyle: 'hidden',
             titleBarOverlay: {
             color: '#000000',      
@@ -290,7 +335,6 @@ if (!gotTheLock) {
 
         mainWindow.webContents.on('did-stop-loading', () => {
             try {
-                console.log("Page Loaded - Injecting Theme & UI...");
             
                 injectTheme();
                 updateThumbar();
@@ -305,6 +349,16 @@ if (!gotTheLock) {
             } catch (e) { 
                 console.log("Error during page load tasks:", e); 
             }
+        });
+
+        mainWindow.webContents.on('enter-html-full-screen', () => {
+            mainWindow.setFullScreen(true);
+            mainWindow.webContents.executeJavaScript('document.body.classList.add("fullscreen-mode")');
+        });
+
+        mainWindow.webContents.on('leave-html-full-screen', () => {
+            mainWindow.setFullScreen(false);
+            mainWindow.webContents.executeJavaScript('document.body.classList.remove("fullscreen-mode")');
         });
 
         mainWindow.webContents.on('will-navigate', (event, url) => {
@@ -378,5 +432,6 @@ if (!gotTheLock) {
     });
 
     ipcMain.on('get-config', (event) => { event.returnValue = cfg; });
+    process.on('warning', e => console.warn(e.stack));
     app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 }
