@@ -99,7 +99,7 @@ You can access the settings menus by **Right-Clicking** anywhere in the app or u
 
 This project is licensed under the MIT License.
 
-EnhancedTube
+EnhancedTube & EnhancedMusic
 Copyright (c) 2026 Aspxcts
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
